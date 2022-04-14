@@ -167,7 +167,6 @@ class Database:
     @required_connection
     def filter(self, field, value):
         """ return filtered list based on matched result """
-        print('.........', field, value, type(field), type(value))
         return self.db.filter(field, value)
 
     @required_connection
