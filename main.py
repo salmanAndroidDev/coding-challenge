@@ -1,49 +1,36 @@
+import os
 from database.source import Database
 from database.exceptions import FieldNotFoundError
-
-# entities
-USER = 'user'
-TICKET = 'ticket'
-ORGANIZATION = 'organization'
-
-# path of all entities
-entities = {
-    USER: 'data/users.json',
-    TICKET: 'data/tickets.json',
-    ORGANIZATION: 'data/organizations.json'
-}
-
-MAIN_OPTIONS = """
- -----------------------------------
-|       Select one option           |
-|-----------------------------------|
-| 1. Search Zendesk                 |
-| 2. View list of searchable fields | 
-| 3. Quit                           |
- -----------------------------------
-"""
-
-ENTITY_OPTIONS = """
- -----------------------------------
-|       Select one option           |
-|-----------------------------------|
-| 1. Users                          |
-| 2. Tickets                        | 
-| 3. Organizations                  |
-| 4. Quit                           |
- -----------------------------------
-"""
+from constants import *
 
 
 def show_searchable_fields_result(user_fields, ticket_fields, organization_fields):
+    dbs = {
+        "USERS": user_fields.fields(),
+        "TICKETS": ticket_fields.fields(),
+        "ORGANIZATIONS": organization_fields.fields()
+    }
     print('=====================================')
-    print('============ USERS ==================')
-    print("\n".join(user_fields.fields()))
-    print('============ TICKETS ================')
-    print("\n".join(user_fields.fields()))
-    print('============ ORGANIZATIONS ==========')
-    print("\n".join(user_fields.fields()))
-    print('=====================================')
+    for db_key in dbs.keys():
+        print(f'{db_key} Fields'.center(50, "="))
+        for field in dbs[db_key]:
+            print(f"* {field}".ljust(49, ' ') + "|")
+    print(''.center(50, '='))
+
+
+def show_search_result(result):
+    if result is not None:
+        assert isinstance(result, dict)
+        print(" RESULT ".center(80, "="))
+        for key in result.keys():
+            # key_string = f"| * {key}:".ljust('30', ' ')
+            print(f"| * {key}:".ljust(30, " ") + f" {result[key]}".ljust(49, " ") + "|")
+            # value_string = f"{result[key]}".ljust(49, " ") + " |"
+            # print(key_string + value_string)
+        print("".center(80, "="))
+    else:
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("***** No result was found *******")
 
 
 if __name__ == "__main__":
@@ -62,8 +49,8 @@ if __name__ == "__main__":
     }
 
     while execute:
-        print(MAIN_OPTIONS)
 
+        print(MAIN_OPTIONS)
         try:
             option = int(input('select your option:'))
         except:
@@ -72,6 +59,7 @@ if __name__ == "__main__":
 
         if option == 1:
             try:
+                os.system('cls' if os.name == 'nt' else 'clear')
                 print(ENTITY_OPTIONS)
                 option = int(input('select your option:'))
 
@@ -85,22 +73,17 @@ if __name__ == "__main__":
                         value = True if value == 'true' else False
 
                     result = dbs_options_dict[option].get(field, value)
-                    if result is not None:
-                        assert isinstance(result, dict)
-                        print("===================== RESULT ===============")
-                        for key in result.keys():
-                            print(f"{key}:  {result[key]}")
-                        print("============================================")
-                    else:
-                        print("No result was found")
-
+                    show_search_result(result)
                     continue
 
+                elif option == 4:
+                    break
                 else:
                     raise ()
 
             except FieldNotFoundError as e:
-                print("ERROR: ", str(e))
+                os.system('cls' if os.name == 'nt' else 'clear')
+                print("****ERROR: ", str(e), '****')
                 continue
 
             except:
@@ -108,6 +91,7 @@ if __name__ == "__main__":
                 continue
 
         if option == 2:
+            os.system('cls' if os.name == 'nt' else 'clear')
             show_searchable_fields_result(user_db, ticked_db, organization_db)
         if option == 3:
             execute = False
