@@ -2,6 +2,7 @@ import os
 from database.source import Database
 from database.exceptions import FieldNotFoundError
 from constants import *
+from main_v2 import Graphic, BuxSize
 
 
 def show_searchable_fields_result(user_fields, ticket_fields, organization_fields):
@@ -40,6 +41,8 @@ if __name__ == "__main__":
     ticked_db = Database().connect(entities[TICKET])
     organization_db = Database().connect(entities[ORGANIZATION])
 
+    graphic = Graphic()
+
     execute = True
 
     dbs_options_dict = {
@@ -48,19 +51,23 @@ if __name__ == "__main__":
         3: organization_db
     }
 
+    main_options = ['Search Zendesk', 'View list of searchable fields', 'Quit']
+    entity_options = ['Users', 'Tickets', 'Organizations', 'Quit']
+
     while execute:
 
-        print(MAIN_OPTIONS)
+        graphic.display(main_options, title='Select one option', bux_size=BuxSize.SMALL)
         try:
             option = int(input('select your option:'))
         except:
-            print('option can only be 1 or 2 or 3')
+            os.system('cls' if os.name == 'nt' else 'clear')
+            graphic.display(str('Options can only be 1 or 2 or 3'), title='ERROR', bux_size=BuxSize.SMALL)
             continue
 
         if option == 1:
             try:
                 os.system('cls' if os.name == 'nt' else 'clear')
-                print(ENTITY_OPTIONS)
+                graphic.display(entity_options, title='Select one option', bux_size=BuxSize.BIG)
                 option = int(input('select your option:'))
 
                 if option in {1, 2, 3}:
@@ -73,25 +80,21 @@ if __name__ == "__main__":
                         value = True if value == 'true' else False
 
                     result = dbs_options_dict[option].get(field, value)
-                    show_search_result(result)
+                    graphic.display(result=result, bux_size=BuxSize.BIG)
                     continue
 
-                elif option == 4:
-                    break
-                else:
-                    raise ()
-
             except FieldNotFoundError as e:
-                os.system('cls' if os.name == 'nt' else 'clear')
-                print("****ERROR: ", str(e), '****')
+                graphic.display(entity_options, title='Select one option', bux_size=BuxSize.BIG)
+                graphic.display(str(e), title='ERROR', bux_size=BuxSize.BIG)
                 continue
-
             except:
-                print('option can only be 1 or 2 or 3')
                 continue
 
         if option == 2:
             os.system('cls' if os.name == 'nt' else 'clear')
-            show_searchable_fields_result(user_db, ticked_db, organization_db)
+            graphic.display(user_db.fields(), title='Users Fields', bux_size=BuxSize.BIG)
+            graphic.display(ticked_db.fields(), title='Tickets Fields', bux_size=BuxSize.BIG)
+            graphic.display(organization_db.fields(), title='Organizations Fields', bux_size=BuxSize.BIG)
+
         if option == 3:
             execute = False
